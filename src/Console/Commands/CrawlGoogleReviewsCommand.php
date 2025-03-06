@@ -3,6 +3,7 @@
 namespace EmplifySoftware\StatamicGoogleReviews\Console\Commands;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
@@ -10,7 +11,9 @@ use Statamic\Taxonomies\LocalizedTerm;
 
 class CrawlGoogleReviewsCommand extends Command
 {
-    const string API_URL = "https://maps.googleapis.com/maps/api/place/details/json";
+    const string API_URL_LEGACY = "https://maps.googleapis.com/maps/api/place/details/json";
+    const string API_URL = "https://places.googleapis.com/v1/places/";
+
 
     /**
      * The name and signature of the console command.
@@ -35,7 +38,7 @@ class CrawlGoogleReviewsCommand extends Command
         $this->info("Crawling Google Maps API...");
 
         $places = Taxonomy::find('google-review-places')->queryTerms()->get();
-        $lang = 'de';
+        $lang = config('statamic-google-reviews.language', App::currentLocale());
 
         foreach ($places as $place) {
             $this->crawlPlace($place, $lang);
@@ -49,24 +52,10 @@ class CrawlGoogleReviewsCommand extends Command
 
         $name = $place->get('title');
         $placeId = $place->get('place_id');
-        $apiKey = config('statamic-google-reviews.google_maps_api_key');
-
-        if (!$apiKey) {
-            throw new Exception("No Google Maps API key found. Please set a GOOGLE_MAPS_API_KEY in your .env file.");
-        }
 
         $this->info("\nCrawling place \"$name\" (place ID: $placeId)");
 
-        $response = Http::get(self::API_URL, [
-            'place_id' => $placeId,
-            'key' => $apiKey,
-            'language' => $lang,
-            'reviews_sort' => 'newest',
-        ]);
-
-        $result = $response->json()['result'];
-        $reviews = $result['reviews'];
-//        $totalRatings = $result['user_ratings_total'];
+        $reviews = $this->getReviewsForPlace($placeId, $lang);
 
         foreach ($reviews as $review) {
             // get slug from author_url: https://www.google.com/maps/contrib/x/reviews -> x
@@ -107,5 +96,63 @@ class CrawlGoogleReviewsCommand extends Command
                     ->save();
             }
         }
+    }
+
+    private function getReviewsForPlace(string $placeId, string $lang) {
+        $useLegacyApi = config('statamic-google-reviews.legacy_api', false);
+
+        if ($useLegacyApi) {
+            return $this->getReviewsForPlaceLegacyAPI($placeId, $lang);
+        }
+        else {
+            return $this->getReviewsForPlaceNewAPI($placeId, $lang);
+        }
+    }
+
+    private function getReviewsForPlaceNewAPI(string $placeId, string $lang) {
+        $apiKey = config('statamic-google-reviews.api_key');
+
+        if (!$apiKey) {
+            throw new Exception("No Google Maps API key found. Please set a GOOGLE_REVIEWS_API_KEY in your .env file.");
+        }
+
+        $response = Http::get(self::API_URL . $placeId, [
+            'fields' => 'reviews',
+            'key' => $apiKey,
+            'languageCode' => $lang,
+        ]);
+
+        $reviews = $response->json()['reviews'];
+
+        return array_map(function($review) {
+            return [
+                'author_name' => $review['authorAttribution']['displayName'],
+                'author_url' => $review['authorAttribution']['uri'],
+                'time' => $review['publishTime'],
+                'rating' => $review['rating'],
+                'profile_photo_url' => $review['authorAttribution']['photoUri'],
+                'text' => $review['text']['text'],
+            ];
+        }, $reviews);
+    }
+
+    private function getReviewsForPlaceLegacyAPI(string $placeId, string $lang) {
+        $apiKey = config('statamic-google-reviews.api_key');
+
+        if (!$apiKey) {
+            throw new Exception("No Google Maps API key found. Please set a GOOGLE_REVIEWS_API_KEY in your .env file.");
+        }
+
+        $response = Http::get(self::API_URL_LEGACY, [
+            'place_id' => $placeId,
+            'key' => $apiKey,
+            'language' => $lang,
+            'reviews_sort' => 'newest',
+        ]);
+
+        $result = $response->json()['result'];
+        $reviews = $result['reviews'];
+
+        return $reviews;
     }
 }
