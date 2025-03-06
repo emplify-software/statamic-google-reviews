@@ -65,7 +65,7 @@ class CrawlGoogleReviewsCommand extends Command
             $authorName = $review['author_name'];
 
             $data = [
-                'title' => $review['author_name'],
+                'title' => $authorName,
                 'author_name' => $authorName,
                 'time' => $review['time'],
                 'rating' => $review['rating'],
