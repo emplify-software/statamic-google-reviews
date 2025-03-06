@@ -1,0 +1,92 @@
+title: Review
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+              display: Title
+      -
+        fields:
+          -
+            handle: place
+            field:
+              max_items: 1
+              mode: select
+              taxonomies:
+                - google-review-places
+              type: terms
+              display: Place
+          -
+            handle: author_name
+            field:
+              type: text
+              width: 50
+              validate:
+                - required
+              display: Author
+              instructions: 'The name of the user who submitted the review'
+          -
+            handle: profile_photo_url
+            field:
+              type: link
+              display: 'Profile Photo URL'
+              instructions: "The URL to the user's profile photo, if available."
+              width: 50
+          -
+            handle: time
+            field:
+              type: date
+              width: 50
+              display: Time
+              instructions: 'The time that the review was submitted'
+          -
+            handle: rating
+            field:
+              max: 5
+              type: range
+              width: 50
+              display: Rating
+              instructions: "The user's overall rating for this place."
+          -
+            handle: text
+            field:
+              remove_empty_nodes: false
+              type: bard
+              display: Text
+              instructions: "The user's review."
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: manual_override
+            field:
+              type: toggle
+              display: 'Manual override'
+              instructions: 'When manual override is enabled, data that is modified in this entry is never overriden with data from the Google API.'
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'
+          -
+            handle: parent
+            field:
+              type: entries
+              collections:
+                - pages
+              max_items: 1
+              listable: false
+              localizable: true

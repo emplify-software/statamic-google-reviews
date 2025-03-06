@@ -16,7 +16,7 @@ tabs:
             handle: place_id
             field:
               type: text
-              display: 'Place ID'
+              display: 'Google Place ID'
   sidebar:
     display: Sidebar
     sections:
