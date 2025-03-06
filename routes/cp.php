@@ -1,9 +1,9 @@
 <?php
-
-use EmplifySoftware\StatamicCookieDialog\Http\Controllers\CookieDialogController;
+use EmplifySoftware\StatamicGoogleReviews\Http\Controllers\GoogleReviewsSettingsController;
 use Illuminate\Support\Facades\Route;
+\Log::info('Custom CP routes loaded!'); // Debugging Log
 
-Route::prefix('cookie-dialog')->name('cookie-dialog.')->group(function () {
-    Route::get('/', [CookieDialogController::class, 'edit'])->name('edit');
-    Route::post('/', [CookieDialogController::class, 'update'])->name('update');
+Route::prefix('google-reviews')->name('google-reviews.')->group(function () {
+    Route::get('/', [GoogleReviewsSettingsController::class, 'settings'])->name('settings');
+    Route::post('/', [GoogleReviewsSettingsController::class, 'update'])->name('update');
 });
