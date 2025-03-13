@@ -4,9 +4,9 @@ namespace EmplifySoftware\StatamicGoogleReviews\Http\Controllers;
 
 use Statamic\Http\Controllers\CP\CpController;
 
-class GoogleReviewsSettingsController extends CpController
+class GoogleReviewsUtilityController extends CpController
 {
-    public function settings()
+    public function edit()
     {
         return 'test';
     }

@@ -3,7 +3,7 @@
 namespace EmplifySoftware\StatamicGoogleReviews;
 
 use App\Http\Controllers\LosysController;
-use EmplifySoftware\StatamicGoogleReviews\Http\Controllers\GoogleReviewsSettingsController;
+use EmplifySoftware\StatamicGoogleReviews\Http\Controllers\GoogleReviewsUtilityController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +11,7 @@ use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Taxonomy;
+use Statamic\Facades\Utility;
 use Statamic\Facades\YAML;
 use Statamic\Providers\AddonServiceProvider;
 
@@ -39,15 +40,15 @@ class ServiceProvider extends AddonServiceProvider
         $schedule->command('google-reviews:crawl')->hourly();
     }
 
-    // TODO: fix cp routes
     private function addSettingsTab(): void
     {
-//        Nav::extend(function ($nav) {
-//            $nav->create('Google Reviews')
-//                ->section('Tools')
-//                ->icon('toggle')
-//                ->route('google-reviews.settings');
-//        });
+        Utility::extend(function () {
+            Utility::register('google-reviews')
+                ->title('Google Reviews')
+                ->action([GoogleReviewsUtilityController::class, 'utility'])
+                ->description('Manage reviews from Google Places')
+                ->icon('users');
+        });
     }
 
     private function createReviewsCollection(): void
