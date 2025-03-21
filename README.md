@@ -73,7 +73,7 @@ To register a new place, follow these steps:
 1. Go to `Taxonomies > Google Review Places` in the control panel 
 2. Click **Create Term**
 3. Enter a name for the place. You can name it whatever you want, e.g. "My Restaurant" or "Berlin Office".
-4. Enter the Google Place ID for the location. You can find the Place ID by searching for the location on [Google Maps](https://www.google.com/maps).
+4. Enter the Google Place ID for the location. You can find the Place ID by searching for the location on the [Place ID Finder](https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder).
 5. Click **Save & Publish**
 
 ### Fetching Review
