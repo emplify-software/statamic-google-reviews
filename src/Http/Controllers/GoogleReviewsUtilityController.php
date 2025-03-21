@@ -1,18 +1,56 @@
 <?php
 
 namespace EmplifySoftware\StatamicGoogleReviews\Http\Controllers;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Artisan;
+use Statamic\Facades\YAML;
 
-use Statamic\Http\Controllers\CP\CpController;
-
-class GoogleReviewsUtilityController extends CpController
+class GoogleReviewsUtilityController extends Controller
 {
-    public function edit()
+    /**
+     * Display the Google Reviews utility.
+     */
+    public function utility()
     {
-        return 'test';
+        $status = $this->getStatus();
+        $lastUpdate = $status['lastUpdate'] ?? -1;
+        $places = $status['places'] ?? [];
+
+        return view('statamic-google-reviews::google-reviews-utility', [
+            'lastUpdate' => $lastUpdate,
+            'places' => $places,
+
+        ]);
+
     }
 
-    public function update()
+    /**
+     * Crawls the latest Google Reviews.
+     */
+    public function update(): JsonResponse
     {
-        return 'test';
+        $exitCode = Artisan::call('google-reviews:crawl');
+        $success = $exitCode === 0;
+
+        return response()
+            ->json([
+                'status' => $success ? 'success' : 'error',
+            ], $success ? 200 : 500);
     }
+
+    /*
+     * Get the crawler status from the status file.
+     * @return array|null The status data or null if the file does not exist.
+     */
+    protected function getStatus(): ?array
+    {
+        $statusFile = storage_path('google-reviews/status.yaml');
+        if (! file_exists($statusFile)) {
+            return null;
+        }
+
+        return YAML::parse(file_get_contents($statusFile));
+    }
+
 }

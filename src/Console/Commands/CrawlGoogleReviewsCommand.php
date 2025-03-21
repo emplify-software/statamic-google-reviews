@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
+use Statamic\Facades\YAML;
 use Statamic\Taxonomies\LocalizedTerm;
 
 class CrawlGoogleReviewsCommand extends Command
@@ -36,26 +37,54 @@ class CrawlGoogleReviewsCommand extends Command
     public function handle(): void
     {
         $this->info("Crawling Google Maps API...");
+        $placesData = [];
+        $error = null;
 
-        $places = Taxonomy::find('google-review-places')->queryTerms()->get();
-        $lang = config('statamic-google-reviews.language', App::currentLocale());
+        try {
+            $places = Taxonomy::find('google-review-places')->queryTerms()->get();
+            $lang = config('statamic-google-reviews.language', App::currentLocale());
 
-        foreach ($places as $place) {
-            $this->crawlPlace($place, $lang);
+            foreach ($places as $place) {
+                $placeData = [];
+                try {
+                    $totalReviews = $this->crawlPlace($place, $lang);
+                    $placeData['total_reviews'] = $totalReviews;
+                }
+                catch (Exception $e) {
+                    $placeError = $e->getMessage();
+                    $this->error("Crawling place failed: $placeError");
+                    $placeData['total_reviews'] = 0;
+                    $placeData['error'] = $placeError;
+                }
+                finally {
+                    $placeData = array_merge($placeData, $this->getPlaceStats($place));
+                    $placesData []= $placeData;
+                }
+            }
+            $this->info("Crawling finished.");
+
         }
+        catch (Exception $e) {
+            $error = $e->getMessage();
+            $this->error("Crawling failed: $error");
+        }
+
+        $this->saveStatus($placesData, $error);
     }
 
     /**
      * @throws Exception
      */
-    private function crawlPlace(LocalizedTerm $place, string $lang) {
+    private function crawlPlace(LocalizedTerm $place, string $lang): int {
 
         $name = $place->get('title');
         $placeId = $place->get('place_id');
 
         $this->info("\nCrawling place \"$name\" (place ID: $placeId)");
 
-        $reviews = $this->getReviewsForPlace($placeId, $lang);
+        $reviewData = $this->getReviewsForPlace($placeId, $lang);
+        $reviews = $reviewData['reviews'];
+        $totalReviews = $reviewData['total_reviews'];
 
         foreach ($reviews as $review) {
             // get slug from author_url: https://www.google.com/maps/contrib/x/reviews -> x
@@ -72,6 +101,7 @@ class CrawlGoogleReviewsCommand extends Command
                 'profile_photo_url' => $review['profile_photo_url'],
                 'text' => $review['text'],
                 'place' => $place->slug(),
+                'is_from_crawler' => true,
             ];
 
             // upsert
@@ -96,9 +126,32 @@ class CrawlGoogleReviewsCommand extends Command
                     ->save();
             }
         }
+
+        return $totalReviews;
     }
 
-    private function getReviewsForPlace(string $placeId, string $lang) {
+    private function getPlaceStats(LocalizedTerm $place) {
+        // get total number of reviews for this place currently in the collection
+        $reviewsQuery = Entry::query()
+            ->where('collection', 'google-reviews')
+            ->where('place', $place->slug());
+
+        $storedReviews = $reviewsQuery->count();
+        $storedCrawledReviews = $reviewsQuery->where('is_from_crawler', true)->count();
+
+        return [
+            'place_id' => $place->get('place_id'),
+            'name' => $place->get('title'),
+            'slug' => $place->slug(),
+            'stored_reviews' => $storedReviews,
+            'stored_crawled_reviews' => $storedCrawledReviews
+        ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getReviewsForPlace(string $placeId, string $lang): array {
         $useLegacyApi = config('statamic-google-reviews.legacy_api', false);
 
         if ($useLegacyApi) {
@@ -109,7 +162,10 @@ class CrawlGoogleReviewsCommand extends Command
         }
     }
 
-    private function getReviewsForPlaceNewAPI(string $placeId, string $lang) {
+    /**
+     * @throws Exception
+     */
+    private function getReviewsForPlaceNewAPI(string $placeId, string $lang): array {
         $apiKey = config('statamic-google-reviews.api_key');
 
         if (!$apiKey) {
@@ -117,26 +173,38 @@ class CrawlGoogleReviewsCommand extends Command
         }
 
         $response = Http::get(self::API_URL . $placeId, [
-            'fields' => 'reviews',
+            'fields' => 'userRatingCount,reviews',
             'key' => $apiKey,
             'languageCode' => $lang,
         ]);
 
-        $reviews = $response->json()['reviews'];
 
-        return array_map(function($review) {
-            return [
-                'author_name' => $review['authorAttribution']['displayName'],
-                'author_url' => $review['authorAttribution']['uri'],
-                'time' => $review['publishTime'],
-                'rating' => $review['rating'],
-                'profile_photo_url' => $review['authorAttribution']['photoUri'],
-                'text' => $review['text']['text'],
-            ];
-        }, $reviews);
+        if ($response->failed()) {
+            throw new Exception($response->json()['error']['message']);
+        }
+
+        $result = $response->json();
+        $reviews = $result['reviews'];
+
+        return [
+            'reviews' => array_map(function($review) {
+                return [
+                    'author_name' => $review['authorAttribution']['displayName'],
+                    'author_url' => $review['authorAttribution']['uri'],
+                    'time' => $review['publishTime'],
+                    'rating' => $review['rating'],
+                    'profile_photo_url' => $review['authorAttribution']['photoUri'],
+                    'text' => $review['text']['text'],
+                ];
+            }, $reviews),
+            'total_reviews' => $result['userRatingCount']
+        ];
     }
 
-    private function getReviewsForPlaceLegacyAPI(string $placeId, string $lang) {
+    /**
+     * @throws Exception
+     */
+    private function getReviewsForPlaceLegacyAPI(string $placeId, string $lang): array {
         $apiKey = config('statamic-google-reviews.api_key');
 
         if (!$apiKey) {
@@ -148,11 +216,39 @@ class CrawlGoogleReviewsCommand extends Command
             'key' => $apiKey,
             'language' => $lang,
             'reviews_sort' => 'newest',
-        ]);
+        ])->json();
 
-        $result = $response->json()['result'];
-        $reviews = $result['reviews'];
+        if (array_key_exists('error_message', $response)) {
+            throw new Exception($response['error_message']);
+        }
 
-        return $reviews;
+        $result = $response['result'];
+        return [
+            'reviews' => $result['reviews'],
+            'total_reviews' => $result['user_ratings_total'],
+        ];
+    }
+
+    /**
+     * Save the status of the crawler to a yaml file.
+     *
+     * @param array $placesData  Current status of the places
+     * @param string|null $error  error message if the crawler failed
+     */
+    protected function saveStatus(array $placesData, ?string $error = null): void
+    {
+        $status = [
+            'lastUpdate' => now()->timestamp,
+            'places' => $placesData,
+            'error' => $error,
+        ];
+
+        // make sure the directory exists
+        if (!file_exists(storage_path('google-reviews'))) {
+            mkdir(storage_path('google-reviews'));
+        }
+        // save yaml file in google-reviews/status.yaml
+        $statusFile = storage_path('google-reviews/status.yaml');
+        file_put_contents($statusFile, YAML::dump($status));
     }
 }

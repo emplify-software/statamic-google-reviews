@@ -16,15 +16,6 @@ tabs:
       -
         fields:
           -
-            handle: place
-            field:
-              max_items: 1
-              mode: select
-              taxonomies:
-                - google-review-places
-              type: terms
-              display: Place
-          -
             handle: author_name
             field:
               type: text
@@ -73,20 +64,31 @@ tabs:
               type: toggle
               display: 'Manual override'
               instructions: 'When manual override is enabled, data that is modified in this entry is never overriden with data from the Google API.'
+              if:
+                is_from_crawler: 'equals true'
       -
         fields:
+          -
+            handle: place
+            field:
+              type: terms
+              taxonomies:
+                - google-review-places
+              display: Place
+              mode: select
+              max_items: 1
+              listable: true
+      -
+        fields:
+          -
+            handle: is_from_crawler
+            field:
+              type: toggle
+              display: 'Is from crawler'
+              visibility: hidden
           -
             handle: slug
             field:
               type: slug
               localizable: true
               validate: 'max:200'
-          -
-            handle: parent
-            field:
-              type: entries
-              collections:
-                - pages
-              max_items: 1
-              listable: false
-              localizable: true

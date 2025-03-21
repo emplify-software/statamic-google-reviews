@@ -2,14 +2,16 @@
 
 namespace EmplifySoftware\StatamicGoogleReviews;
 
-use App\Http\Controllers\LosysController;
+use App\Listeners\PreventDeletingMounts;
 use EmplifySoftware\StatamicGoogleReviews\Http\Controllers\GoogleReviewsUtilityController;
+use EmplifySoftware\StatamicGoogleReviews\Listeners\GoogleReviewPlacesUpdates;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
+use Statamic\Events\TaxonomySaved;
+use Statamic\Events\TermDeleted;
+use Statamic\Events\TermSaved;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
-use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Utility;
 use Statamic\Facades\YAML;
@@ -21,7 +23,16 @@ class ServiceProvider extends AddonServiceProvider
     public const BLUEPRINTS_PATH = __DIR__.'/../resources/blueprints/';
 
     protected $routes = [
-        'cp' => __DIR__.'/../routes/cp.php',
+        'actions' => __DIR__.'/../routes/actions.php',
+    ];
+
+    protected $listen = [
+        TermSaved::class => [
+            GoogleReviewPlacesUpdates::class,
+        ],
+        TermDeleted::class => [
+            GoogleReviewPlacesUpdates::class,
+        ]
     ];
 
     public function bootAddon(): void
@@ -29,6 +40,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->createPlacesTaxonomy();
         $this->createReviewsCollection();
         $this->addSettingsTab();
+        $this->registerCommands();
 
         $this->publishes([
             __DIR__.'/../config/statamic-google-reviews.php' => config_path('statamic-google-reviews.php'),
@@ -38,6 +50,13 @@ class ServiceProvider extends AddonServiceProvider
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('google-reviews:crawl')->hourly();
+    }
+
+    private function registerCommands(): void
+    {
+        $this->commands([
+            Console\Commands\CrawlGoogleReviewsCommand::class,
+        ]);
     }
 
     private function addSettingsTab(): void
