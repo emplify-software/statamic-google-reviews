@@ -135,6 +135,17 @@ Since the reviews are stored in a collection, you can also use the collection ta
 {{ /collection:google-reviews }}
 ```
 
+## Control Panel Utility
+
+Under `Utilities > Google Reviews`, you can see the current status of the review crawlers.
+With the "Update Reviews" button, you can also manually trigger a fetch of all reviews.
+Additionally, you can see a list of all registered places. 
+
+If a place ID is incorrect or if the reviews could not be fetched for some other reason, an error message will be displayed for the place.
+You can also see how many reviews are locally stored for each place and how many reviews are actually available on Google (see [Known Issues](#-known-issues)).
+
+<img src="resources/img/cp-screenshot.png">
+
 ## ⚠️ Known Issues
 
 * Due to a limitation in the Google Places API, only the last 5 reviews can be fetched. This is not a problem for new reviews, because all reviews are fetched and stored in the collection.
