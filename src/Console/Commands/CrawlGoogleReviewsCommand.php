@@ -43,7 +43,7 @@ class CrawlGoogleReviewsCommand extends Command
 
         try {
             $places = Taxonomy::find('google-review-places')->queryTerms()->get();
-            $lang = config('statamic-google-reviews.language', App::currentLocale() ?? Config::get('app.locale') ?? 'en');
+            $lang = config('statamic-google-reviews.language') ?? App::currentLocale() ?? 'en';
 
             foreach ($places as $place) {
                 $placeData = [];
