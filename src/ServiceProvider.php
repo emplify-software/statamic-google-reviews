@@ -45,17 +45,16 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../config/statamic-google-reviews.php' => config_path('statamic-google-reviews.php'),
         ], 'statamic-google-reviews');
+    }
 
-        // Register scheduled crawl command
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $frequency = config('statamic-google-reviews.update_interval', 60);
-            $cronExpression = "*/$frequency * * * *";
+    protected function schedule(Schedule $schedule)
+    {
+        $frequency = config('statamic-google-reviews.update_interval', 60);
+        $cronExpression = "*/$frequency * * * *";
 
-            $schedule->command('google-reviews:crawl')
-                ->withoutOverlapping()
-                ->cron($cronExpression);
-        });
+        $schedule->command('google-reviews:crawl')
+            ->withoutOverlapping()
+            ->cron($cronExpression);
     }
 
     private function registerCommands(): void
