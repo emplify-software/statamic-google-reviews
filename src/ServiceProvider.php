@@ -48,11 +48,11 @@ class ServiceProvider extends AddonServiceProvider
 
         // Register scheduled crawl command
         $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
             $frequency = config('statamic-google-reviews.update_interval', 60);
             $cronExpression = "*/$frequency * * * *";
 
-            $schedule->command('google-reviews:crawl')
+            Schedule::command('google-reviews:crawl')
+                ->withoutOverlapping()
                 ->cron($cronExpression);
         });
     }
