@@ -5,9 +5,7 @@ namespace EmplifySoftware\StatamicGoogleReviews;
 use App\Listeners\PreventDeletingMounts;
 use EmplifySoftware\StatamicGoogleReviews\Http\Controllers\GoogleReviewsUtilityController;
 use EmplifySoftware\StatamicGoogleReviews\Listeners\GoogleReviewPlacesUpdates;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\File;
-use Statamic\Events\TaxonomySaved;
 use Statamic\Events\TermDeleted;
 use Statamic\Events\TermSaved;
 use Statamic\Facades\Blueprint;
@@ -45,16 +43,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../config/statamic-google-reviews.php' => config_path('statamic-google-reviews.php'),
         ], 'statamic-google-reviews');
-    }
-
-    protected function schedule(Schedule $schedule)
-    {
-        $frequency = config('statamic-google-reviews.update_interval', 60);
-        $cronExpression = "*/$frequency * * * *";
-
-        $schedule->command('google-reviews:crawl')
-            ->withoutOverlapping()
-            ->cron($cronExpression);
     }
 
     private function registerCommands(): void

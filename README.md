@@ -13,10 +13,10 @@ This Statamic addon fetches Google customer reviews for one or multiple location
 > This addon does not require the Google My Business API, which makes it easier to set up and use.
 
 ✅ Simple configuration<br>
-✅ Multi location support<br>
+✅ Supports multiple locations<br>
 ✅ Reviews are cached in a collection<br>
-✅ Periodic synchronization<br>
 ✅ Manual review editing and removal<br>
+✅ No client-side API calls to Google - GDPR compliant<br>
 
 ## 🛠️ How to Install
 
@@ -64,7 +64,7 @@ php artisan vendor:publish --tag=statamic-google-reviews
     ```dotenv
     GOOGLE_REVIEWS_LEGACY_API=true
     ```
-   
+
 ### Adding Places
 
 The addon automatically generates a taxonomy called `Google Review Places`.
@@ -84,6 +84,11 @@ You can also manually fetch the reviews by running the following command:
 ``` bash
 php artisan google-reviews:crawl
 ```
+
+### Scheduling
+TODO: Add scheduling instructions like in
+https://spatie.be/docs/laravel-backup/v9/installation-and-setup
+
 
 
 ### Removing and editing reviews

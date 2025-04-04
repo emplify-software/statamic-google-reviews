@@ -36,16 +36,4 @@ return [
     |
     */
     'legacy_api' => env('GOOGLE_REVIEWS_LEGACY_API', false),
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Interval
-    |--------------------------------------------------------------------------
-    |
-    | The interval in minutes in which the reviews should be fetched from the
-    | Google Places API. The default is 60 minutes.
-    |
-    */
-    'update_interval' => env('GOOGLE_REVIEWS_UPDATE_INTERVAL', 60),
 ];
