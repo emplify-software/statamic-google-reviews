@@ -16,7 +16,7 @@
     <div class="mt-3 text-sm card">
         <p class="text-gray-700">
             This view shows the current status of the Google Review imports from the Google Places API.
-            New reviews are automatically fetched every hour. You can also manually trigger an update here.
+            You can manually trigger a sync of the latest reviews by clicking the "Update Reviews" button.
         </p>
 
         <hr class="my-4">
@@ -56,6 +56,16 @@
                 </a>
             </div>
         </div>
+
+
+        @if($error)
+            <div class="mt-2">
+                <div style="background: #ef44451a; color: #ef4445"
+                     class="px-2 py-1 text-xs rounded">
+                    <b>Error:</b> {{ $error }}
+                </div>
+            </div>
+        @endif
     </div>
 
     <div class="mt-3 text-sm card">

@@ -16,11 +16,12 @@ class GoogleReviewsUtilityController extends Controller
         $status = $this->getStatus();
         $lastUpdate = $status['lastUpdate'] ?? -1;
         $places = $status['places'] ?? [];
+        $error = $status['error'] ?? null;
 
         return view('statamic-google-reviews::google-reviews-utility', [
             'lastUpdate' => $lastUpdate,
             'places' => $places,
-
+            'error' => $error,
         ]);
 
     }

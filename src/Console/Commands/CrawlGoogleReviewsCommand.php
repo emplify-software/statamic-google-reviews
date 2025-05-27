@@ -39,7 +39,6 @@ class CrawlGoogleReviewsCommand extends Command
     {
         $this->info("Crawling Google Maps API...");
         $placesData = [];
-        $error = null;
 
         try {
             $places = Taxonomy::find('google-review-places')->queryTerms()->get();
@@ -63,14 +62,21 @@ class CrawlGoogleReviewsCommand extends Command
                 }
             }
             $this->info("Crawling finished.");
-
+            $this->saveStatus($placesData);
         }
         catch (Exception $e) {
             $error = $e->getMessage();
             $this->error("Crawling failed: $error");
+            $this->saveStatus($placesData, $error);
+            throw new Exception("Review crawling failed: $error");
         }
 
-        $this->saveStatus($placesData, $error);
+        // if any place has an error, throw an exception
+        foreach ($placesData as $placeData) {
+            if (isset($placeData['error'])) {
+                throw new Exception("Crawling failed for place: " . $placeData['name'] . " - " . $placeData['error']);
+            }
+        }
     }
 
     /**
