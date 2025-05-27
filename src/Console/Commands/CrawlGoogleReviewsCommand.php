@@ -1,10 +1,10 @@
 <?php
 
 namespace EmplifySoftware\StatamicGoogleReviews\Console\Commands;
+use EmplifySoftware\StatamicGoogleReviews\Helpers\GoogleReviewsHelper;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
@@ -42,7 +42,7 @@ class CrawlGoogleReviewsCommand extends Command
 
         try {
             $places = Taxonomy::find('google-review-places')->queryTerms()->get();
-            $lang = config('statamic-google-reviews.language') ?? App::currentLocale() ?? 'en';
+            $lang = GoogleReviewsHelper::getLocale();
 
             foreach ($places as $place) {
                 $placeData = [];

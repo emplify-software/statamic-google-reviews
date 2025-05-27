@@ -24,7 +24,8 @@
         <div class="flex items-start justify-between gap-3">
 
             <div>
-                <b>Last update:</b> <span id="last-update"></span>
+                <b>Last update:</b> <span id="last-update"></span><br>
+                <b>Locale:</b> <span>{{ strtoupper($locale) }}</span>
             </div>
 
             <div>

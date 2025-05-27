@@ -2,6 +2,7 @@
 
 namespace EmplifySoftware\StatamicGoogleReviews\Http\Controllers;
 use App\Http\Controllers\Controller;
+use EmplifySoftware\StatamicGoogleReviews\Helpers\GoogleReviewsHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Artisan;
 use Statamic\Facades\YAML;
@@ -17,11 +18,13 @@ class GoogleReviewsUtilityController extends Controller
         $lastUpdate = $status['lastUpdate'] ?? -1;
         $places = $status['places'] ?? [];
         $error = $status['error'] ?? null;
+        $locale = GoogleReviewsHelper::getLocale();
 
         return view('statamic-google-reviews::google-reviews-utility', [
             'lastUpdate' => $lastUpdate,
             'places' => $places,
             'error' => $error,
+            'locale' => $locale,
         ]);
 
     }
