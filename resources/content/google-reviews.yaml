@@ -1,0 +1,5 @@
+title: 'Google Reviews'
+revisions: false
+structure:
+  root: false
+  max_depth: 1
