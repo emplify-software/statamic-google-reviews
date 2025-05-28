@@ -177,7 +177,7 @@ Additionally, you can see a list of all registered places.
 If a place ID is incorrect or if the reviews could not be fetched for some other reason, an error message will be displayed for the place.
 You can also see how many reviews are locally stored for each place and how many reviews are actually available on Google (see [Known Issues](#-known-issues)).
 
-<img src="resources/img/cp-screenshot.png">
+<img src="resources/img/cp-screenshot.jpg">
 
 ## ⚠️ Known Issues
 
