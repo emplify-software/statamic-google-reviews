@@ -168,7 +168,7 @@ Since the reviews are stored in a collection, you can also use the collection ta
 {{ /collection:google-reviews }}
 ```
 
-## Control Panel Utility
+## 🎛️ Control Panel Utility
 
 Under `Utilities > Google Reviews`, you can see the current status of the review crawlers.
 With the "Update Reviews" button, you can also manually trigger a fetch of all reviews.
