@@ -34,7 +34,7 @@ class GoogleReviewsUtilityController extends Controller
      */
     public function update(): JsonResponse
     {
-        $exitCode = Artisan::call('google-reviews:crawl');
+        $exitCode = Artisan::call('emplify-software:google-reviews:crawl');
         $success = $exitCode === 0;
 
         return response()

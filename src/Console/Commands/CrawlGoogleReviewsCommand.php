@@ -22,7 +22,7 @@ class CrawlGoogleReviewsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'google-reviews:crawl';
+    protected $signature = 'emplify-software:google-reviews:crawl';
 
     /**
      * The console command description.

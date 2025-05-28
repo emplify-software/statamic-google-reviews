@@ -19,6 +19,6 @@ class GoogleReviewPlacesUpdates
         }
 
         // crawl
-        Artisan::call('google-reviews:crawl');
+        Artisan::call('emplify-software:google-reviews:crawl');
     }
 }

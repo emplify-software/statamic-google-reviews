@@ -86,19 +86,19 @@ To register a new place, follow these steps:
 You can manually fetch the reviews for all registered places by running the following command:
 
 ``` bash
-php artisan google-reviews:crawl
+php artisan emplify-software:google-reviews:crawl
 ```
 
 ### Scheduling Review Fetching
 
 To keep the reviews up-to-date, you can set up a scheduled task to automatically fetch the reviews at regular intervals.
-Like any other command, you can schedule the `google-reviews:crawl` command in the console kernel:
+Like any other command, you can schedule the `emplify-software:google-reviews:crawl` command in the console kernel:
 
 ```php
 // app/Console/Kernel.php
 protected function schedule(Schedule $schedule)
 {
-    $schedule->command('google-reviews:crawl')->daily();
+    $schedule->command('emplify-software:google-reviews:crawl')->daily();
 }
 ```
 
@@ -107,13 +107,13 @@ If you are using Laravel 11 or later, you can also directly add the schedule com
 // routes/console.php
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('google-reviews:crawl')->daily();
+Schedule::command('emplify-software:google-reviews:crawl')->daily();
 ```
 
 If the crawling command fails, it will return an error code, which can be handled in the scheduler if needed: 
 ```php
 $schedule
-    ->command('google-reviews:crawl')->daily()
+    ->command('emplify-software:google-reviews:crawl')->daily()
     ->onFailure(function () {
         // Handle the failure, e.g. send a notification
     });
