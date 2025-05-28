@@ -27,12 +27,15 @@ run the following command from your project root:
 composer require emplify-software/statamic-google-reviews
 ```
 
-After the addon is installed, publish the configuration file by running:
+After the addon is installed, publish the configuration file, blueprints and collections for the addon by running:
 
 ``` bash
 php artisan vendor:publish --tag=statamic-google-reviews
 ```
 
+After running the publish command, you will find the configuration file at `config/statamic-google-reviews.php`.
+Since you can define all configuration options in the `.env` file (see [Configuration](#configuration)), you normally do not need to edit the configuration file directly.
+A new collection called `Google Reviews` will also be created, as well as a new taxonomy called `Google Review Places`.
 
 ## 💡 How to Use
 
@@ -75,10 +78,12 @@ To register a new place, follow these steps:
 3. Enter a name for the place. You can name it whatever you want, e.g. "My Restaurant" or "Berlin Office".
 4. Enter the Google Place ID for the location. You can find the Place ID by searching for the location on the [Place ID Finder](https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder).
 5. Click **Save & Publish**
+6. The latest reviews for the new place will automatically be fetched after saving the term. If the place has reviews, you will now see them
+   under `Collections > Google Reviews` in the control panel.
 
 ### Fetching Reviews
 
-You can also manually fetch the reviews for all registered places by running the following command:
+You can manually fetch the reviews for all registered places by running the following command:
 
 ``` bash
 php artisan google-reviews:crawl
@@ -167,8 +172,8 @@ Since the reviews are stored in a collection, you can also use the collection ta
 
 Under `Utilities > Google Reviews`, you can see the current status of the review crawlers.
 With the "Update Reviews" button, you can also manually trigger a fetch of all reviews.
-Additionally, you can see a list of all registered places. 
 
+Additionally, you can see a list of all registered places.
 If a place ID is incorrect or if the reviews could not be fetched for some other reason, an error message will be displayed for the place.
 You can also see how many reviews are locally stored for each place and how many reviews are actually available on Google (see [Known Issues](#-known-issues)).
 
