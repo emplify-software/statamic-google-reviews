@@ -33,6 +33,6 @@
         }
     },
     "minimum-stability": "dev",
-    "license": "proprietary",
+    "license": "MIT",
     "prefer-stable": true
 }
